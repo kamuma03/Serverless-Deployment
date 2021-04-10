@@ -21,16 +21,17 @@ def lambda_handler(event, context):
     print(body)
 
     data = json.loads(body)['data']
-    data = float(data)
-    print(data)
     
+    print([data])
+
     # Download pickled model from S3 and unpickle
     s3.download_file(s3_bucket, classifier_model, temp_path)
     with open(temp_path, 'rb') as f:
         classifier = pickle.load(f)
 
     # Prediction of the class 
-    class_prediction = classifier.predict([[data]])[0]
+    class_prediction = classifier.predict([data])[0]
+
     print(class_prediction)
 
     # Return json message
