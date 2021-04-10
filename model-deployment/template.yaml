@@ -2,26 +2,31 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
   serverless-task to deploy the classification model
-
-  Sample SAM Template for serverless-task
+  
 
 Globals:
   Function:
     Timeout: 10
 
+# Defining the resource required
 Resources:
   ClassifierFunction:
     Type: AWS::Serverless::Function
     Properties:
+      # folder where the lambda handler is located 
       CodeUri: code/
+      # function handling the lambda function
       Handler: app.lambda_handler
       Runtime: python3.8
       MemorySize: 1024
+      # Role required to access S3 
       Role: arn:aws:iam::667496742526:role/lambda-role
       Environment:
+        # S3 bucket name and model name 
         Variables:
           s3_bucket: kashifs3bucket
           model_name: classification_model.p
+      # definition of the events    
       Events:
         Classifier:
           Type: Api
@@ -29,8 +34,9 @@ Resources:
             Path: /classify
             Method: post
 
+# definition of the API Gateway for commuication to the lambda function
 Outputs:
-  WineClassifierApi:
-    Description: API Gateway endpoint URL for Prod stage for WineClassifier function
+  ClassifierApi:
+    Description: API Gateway endpoint URL  for Classifier function
     Value:
       Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/classify/

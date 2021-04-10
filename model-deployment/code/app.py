@@ -1,42 +1,42 @@
 import json
+import sklearn
+import boto3
+import os
+import pickle
+from sklearn.ensemble import RandomForestClassifier
 
-# import requests
+# Setting up the environment for the model and appropriate paths
+s3 = boto3.client('s3')
+s3_bucket = os.environ['s3_bucket']
+classifier_model = os.environ['model_name']
+temp_path = '/tmp/' + classifier_model
 
-
+# definition of the lambda handler function
 def lambda_handler(event, context):
-    """Sample pure Lambda function
+    
+    print(event)
 
-    Parameters
-    ----------
-    event: dict, required
-        API Gateway Lambda Proxy Input Format
+    # Parse input
+    body = event['body']
+    print(body)
 
-        Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format
+    data = json.loads(body)['data']
+    data = float(data)
+    print(data)
+    
+    # Download pickled model from S3 and unpickle
+    s3.download_file(s3_bucket, classifier_model, temp_path)
+    with open(temp_path, 'rb') as f:
+        classifier = pickle.load(f)
 
-    context: object, required
-        Lambda Context runtime methods and attributes
+    # Prediction of the class 
+    class_prediction = classifier.predict([[data]])[0]
+    print(class_prediction)
 
-        Context doc: https://docs.aws.amazon.com/lambda/latest/dg/python-context-object.html
-
-    Returns
-    ------
-    API Gateway Lambda Proxy Output Format: dict
-
-        Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
-    """
-
-    # try:
-    #     ip = requests.get("http://checkip.amazonaws.com/")
-    # except requests.RequestException as e:
-    #     # Send some context about this error to Lambda Logs
-    #     print(e)
-
-    #     raise e
-
+    # Return json message
     return {
         "statusCode": 200,
         "body": json.dumps({
-            "message": "hello world",
-            # "location": ip.text.replace("\n", "")
+            "prediction": str(class_prediction),
         }),
     }
