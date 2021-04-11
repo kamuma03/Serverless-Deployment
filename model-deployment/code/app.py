@@ -14,15 +14,15 @@ temp_path = '/tmp/' + classifier_model
 # definition of the lambda handler function
 def lambda_handler(event, context):
     
-    print(event)
+    #print(event)
 
     # Parse input
     body = event['body']
-    print(body)
+    #print(body)
 
     data = json.loads(body)['data']
     
-    print([data])
+    #print([data])
 
     # Download pickled model from S3 and unpickle
     s3.download_file(s3_bucket, classifier_model, temp_path)
@@ -32,7 +32,7 @@ def lambda_handler(event, context):
     # Prediction of the class 
     class_prediction = classifier.predict([data])[0]
 
-    print(class_prediction)
+    #print(class_prediction)
 
     # Return json message
     return {
